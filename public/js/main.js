@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('O carrinho está vazio.');
             return;
         }
-        const phoneNumber = '5527998615111'; // Número fixo para envio (exemplo)
+        const phoneNumber = '5527999999999'; // Número fixo para envio (exemplo)
         let message = 'Resumo do pedido:%0A';
         cart.forEach(item => {
             message += `${item.name} - R$ ${item.price.toFixed(2).replace('.', ',')} x ${item.quantity}%0A`;
