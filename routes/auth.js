@@ -8,9 +8,10 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
 // Login route
 router.post('/login', async (req, res) => {
-    const { username, password } = req.body;
+    let { username, password } = req.body;
     try {
-        const user = await User.findOne({ username });
+        username = username.toLowerCase();
+        const user = await User.findOne({ username: { $regex: new RegExp(`^${username}$`, 'i') } });
         if (!user) return res.status(401).json({ message: 'Usuário ou senha inválidos' });
 
         const isMatch = await bcrypt.compare(password, user.password);

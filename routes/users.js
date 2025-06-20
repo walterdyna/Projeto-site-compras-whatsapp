@@ -26,8 +26,9 @@ import bcrypt from 'bcrypt';
 
 // Rota para criar novos usuários (apenas supremo)
 router.post('/', authenticateToken, isSupremeUser, async (req, res) => {
-    const { username, password, isAdmin } = req.body;
+    let { username, password, isAdmin } = req.body;
     try {
+        username = username.toLowerCase();
         console.log('POST /api/users - Dados recebidos:', req.body);
         const existingUser = await User.findOne({ username });
         if (existingUser) {
