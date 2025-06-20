@@ -26,18 +26,17 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
 app.use(cors());
 
-import helmet from 'helmet';
-
 // Helmet para segurança HTTP com configuração CSP para permitir Cloudinary
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
       imgSrc: ["'self'", "https://res.cloudinary.com"],
+      mediaSrc: ["'self'", "https://res.cloudinary.com"],
       scriptSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       connectSrc: ["'self'"],
-      fontSrc: ["'self'"],
+      fontSrc: ["'self'", "https://res.cloudinary.com"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: [],
     },
