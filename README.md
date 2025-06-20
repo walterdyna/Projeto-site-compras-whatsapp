@@ -123,6 +123,8 @@ Acesse no navegador: `http://localhost:3000`
 
 - Uso de JWT para autenticação e autorização
 - Hashing de senhas com bcrypt para segurança
+- Middleware Helmet para cabeçalhos de segurança HTTP
+- Redirecionamento automático de HTTP para HTTPS em produção
 - Middleware para proteção de rotas sensíveis
 - Validação de dados no backend para evitar inconsistências
 - Tratamento global de erros para facilitar manutenção
