@@ -13,19 +13,19 @@ document.addEventListener('DOMContentLoaded', () => {
         userInfoDiv.innerHTML = `Logado como: <strong>${username}</strong> <button id="logout-btn">Sair</button>`;
         if (loginLink) loginLink.style.display = 'none';
 
-        // Mostrar link Gerenciar Usuários apenas para supremo
+        // Mostrar link Gerenciar Usuários apenas para isAdmin
         if (usersLink) {
-            if (username === 'alexdyna' || username === 'queziacastelo') {
+            if (isAdmin) {
                 usersLink.style.display = 'inline';
             } else {
                 usersLink.style.display = 'none';
             }
         }
 
-        // Show "Gerar Relatório de Estoque" button only for user "alexdyna"
+        // Show "Gerar Relatório de Estoque" button only for isAdmin
         const btnReportStock = document.getElementById('btnReportStock');
         if (btnReportStock) {
-            if (username === 'alexdyna' || username === 'queziacastelo') {
+            if (isAdmin) {
                 btnReportStock.style.display = 'inline-block';
             } else {
                 btnReportStock.style.display = 'none';
