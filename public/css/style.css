@@ -12,7 +12,7 @@ body {
     border: none;
 }
 
-#btnReportStock{
+#btnReportStock, #btnChangeWhatsapp{
     border-radius: 30px;
     padding: 5px;
 }

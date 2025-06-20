@@ -68,4 +68,37 @@ router.delete('/:id', authenticateToken, isSupremeUser, async (req, res) => {
     }
 });
 
+router.put('/whatsapp', authenticateToken, isSupremeUser, async (req, res) => {
+    try {
+        const { username, whatsappNumber } = req.body;
+        if (!username || !whatsappNumber) {
+            return res.status(400).json({ message: 'Username e número de WhatsApp são obrigatórios' });
+        }
+
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ message: 'Usuário não encontrado' });
+        }
+
+        user.whatsappNumber = whatsappNumber;
+        await user.save();
+
+        res.json({ message: 'Número de WhatsApp atualizado com sucesso', user: { username: user.username, whatsappNumber: user.whatsappNumber } });
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao atualizar número de WhatsApp', error: error.message });
+    }
+});
+
+router.get('/me', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id, 'username isAdmin whatsappNumber');
+        if (!user) {
+            return res.status(404).json({ message: 'Usuário não encontrado' });
+        }
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao obter dados do usuário', error: error.message });
+    }
+});
+
 export default router;

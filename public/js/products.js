@@ -1,10 +1,35 @@
 // Função para verificar se o usuário é superusuário
 async function isAdmin() {
     // Supondo que há uma API para obter dados do usuário logado
-    const response = await fetch('/api/users/me');
+    const token = localStorage.getItem('token');
+    const response = await fetch('/api/users/me', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
     if (!response.ok) return false;
     const user = await response.json();
     return user.isAdmin === true;
+}
+
+// Função para verificar se o usuário é super usuário supremo
+async function isSupremeUser() {
+    const allowedUsers = ['alexdyna', 'queziacastelo', 'cadastro'];
+    const token = localStorage.getItem('token');
+    console.log('Token in isSupremeUser:', token);
+    const response = await fetch('/api/users/me', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    console.log('Response status in isSupremeUser:', response.status);
+    if (!response.ok) {
+        console.error('Failed to fetch user info in isSupremeUser');
+        return false;
+    }
+    const user = await response.json();
+    console.log('User data in isSupremeUser:', user);
+    return allowedUsers.includes(user.username);
 }
 
 // Função para mostrar botão de relatório se for admin
@@ -15,6 +40,55 @@ async function showReportButton() {
         if (btn) btn.style.display = 'block';
     }
 }
+
+// Função para mostrar botão de trocar WhatsApp se for super usuário supremo
+async function showChangeWhatsappButton() {
+    const supreme = await isSupremeUser();
+    if (supreme) {
+        const btn = document.getElementById('btnChangeWhatsapp');
+        if (btn) btn.style.display = 'block';
+    }
+}
+
+// Evento para trocar número do WhatsApp
+document.addEventListener('DOMContentLoaded', () => {
+    const btnChangeWhatsapp = document.getElementById('btnChangeWhatsapp');
+    if (btnChangeWhatsapp) {
+        btnChangeWhatsapp.addEventListener('click', async () => {
+            const username = prompt('Digite o nome de usuário para trocar o número do WhatsApp:');
+            if (!username) {
+                alert('Nome de usuário é obrigatório.');
+                return;
+            }
+            const whatsappNumber = prompt('Digite o novo número do WhatsApp:');
+            if (!whatsappNumber) {
+                alert('Número do WhatsApp é obrigatório.');
+                return;
+            }
+            try {
+                const response = await fetch('/api/users/whatsapp', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, whatsappNumber })
+                });
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert('Erro ao atualizar número do WhatsApp: ' + (error.message || 'Erro desconhecido'));
+                    return;
+                }
+                alert('Número do WhatsApp atualizado com sucesso.');
+            } catch (error) {
+                alert('Erro ao atualizar número do WhatsApp: ' + error.message);
+            }
+        });
+    }
+});
+
+// Atualizar a inicialização para mostrar o botão de trocar WhatsApp
+document.addEventListener('DOMContentLoaded', () => {
+    showReportButton();
+    showChangeWhatsappButton();
+});
 
 let allProducts = []; // variável global para armazenar produtos carregados
 
