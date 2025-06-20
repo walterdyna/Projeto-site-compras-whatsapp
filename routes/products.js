@@ -101,9 +101,17 @@ router.get('/', async (req, res) => {
 router.put('/:id', upload.single('productImage'), verifyToken, verifyAdmin, async (req, res) => {
     try {
         const updatedData = req.body;
+
+        // Mapear productStock para stock e converter para número
+        if (updatedData.productStock !== undefined) {
+            updatedData.stock = Number(updatedData.productStock);
+            delete updatedData.productStock;
+        }
+
         if (req.file) {
             updatedData.imageUrl = req.file.path;
         }
+
         const updatedProduct = await Product.findByIdAndUpdate(
             req.params.id,
             updatedData,
@@ -153,6 +161,33 @@ router.get('/report', verifyToken, verifyAdmin, async (req, res) => {
             stock: p.stock
         }));
         res.json(report);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.post('/decrease-stock', verifyToken, verifyAdmin, async (req, res) => {
+    try {
+        const { items } = req.body; // items: [{ productId, quantity }]
+        if (!Array.isArray(items)) {
+            return res.status(400).json({ error: 'Formato inválido para items' });
+        }
+
+        const bulkOps = items.map(({ productId, quantity }) => ({
+            updateOne: {
+                filter: { _id: productId, stock: { $gte: quantity } },
+                update: { $inc: { stock: -quantity } }
+            }
+        }));
+
+        const bulkWriteResult = await Product.bulkWrite(bulkOps);
+
+        // Check if all updates matched
+        if (bulkWriteResult.matchedCount !== items.length) {
+            return res.status(400).json({ error: 'Estoque insuficiente para um ou mais produtos' });
+        }
+
+        res.json({ message: 'Estoque atualizado com sucesso' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

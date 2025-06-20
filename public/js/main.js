@@ -173,20 +173,59 @@ document.addEventListener('DOMContentLoaded', () => {
         cartTotalSpan.textContent = calculateTotal(cart).toFixed(2).replace('.', ',');
     }
 
-    function sendWhatsAppMessage() {
+    async function sendWhatsAppMessage() {
         const cart = getCart();
         if (cart.length === 0) {
             alert('O carrinho está vazio.');
             return;
         }
-        const phoneNumber = '5527999999999'; // Número fixo para envio (exemplo)
-        let message = 'Resumo do pedido:%0A';
-        cart.forEach(item => {
-            message += `${item.name} - R$ ${item.price.toFixed(2).replace('.', ',')} x ${item.quantity}%0A`;
-        });
-        message += `Total: R$ ${calculateTotal(cart).toFixed(2).replace('.', ',')}`;
-        const url = `https://wa.me/${phoneNumber}?text=${message}`;
-        window.open(url, '_blank');
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Você precisa estar logado para enviar o pedido.');
+            return;
+        }
+
+        // Preparar dados para atualizar estoque
+        const items = cart.map(item => ({
+            productId: item._id,
+            quantity: item.quantity
+        }));
+
+        try {
+            // Chamar backend para diminuir estoque
+            const response = await fetch('/api/products/decrease-stock', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ items })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                alert('Erro ao atualizar estoque: ' + (errorData.error || response.statusText));
+                return;
+            }
+
+            // Se sucesso, abrir WhatsApp com resumo do pedido
+            const phoneNumber = '5527999999999'; // Número fixo para envio (exemplo)
+            let message = 'Resumo do pedido:%0A';
+            cart.forEach(item => {
+                message += `${item.name} - R$ ${item.price.toFixed(2).replace('.', ',')} x ${item.quantity}%0A`;
+            });
+            message += `Total: R$ ${calculateTotal(cart).toFixed(2).replace('.', ',')}`;
+            const url = `https://wa.me/${phoneNumber}?text=${message}`;
+            window.open(url, '_blank');
+
+            // Limpar carrinho após envio
+            localStorage.removeItem('cart');
+            renderCart();
+
+        } catch (error) {
+            alert('Erro na requisição: ' + error.message);
+        }
     }
 
     function removeFromCart(productId) {
@@ -196,7 +235,11 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCart();
     }
 
-    fetch('/api/products')
+    fetch('/api/products', {
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    })
         .then(response => response.json())
         .then(products => {
             const productGrid = document.querySelector('.product-grid');
@@ -349,7 +392,10 @@ document.addEventListener('DOMContentLoaded', () => {
         cartModal.style.display = 'none';
     });
 
-    sendWhatsAppBtn.addEventListener('click', () => {
-        sendWhatsAppMessage();
-    });
+    const sendWhatsAppBtn = document.getElementById('send-whatsapp-btn');
+    if (sendWhatsAppBtn) {
+        sendWhatsAppBtn.addEventListener('click', () => {
+            sendWhatsAppMessage();
+        });
+    }
 });
