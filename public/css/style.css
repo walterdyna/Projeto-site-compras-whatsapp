@@ -17,6 +17,18 @@ body {
     padding: 5px;
 }
 
+#search-input, #class-select{
+    border-radius: 10px;
+    color: #007bff;
+    border: 2px solid #007bff;;
+    opacity: 1;
+}
+
+#search-input::placeholder {
+  color: blue;
+  opacity: 1; /* para garantir no Firefox */
+}
+
 /* Estilo para a seção de gerenciamento de usuários */
 #user-management-section {
     max-width: 500px;

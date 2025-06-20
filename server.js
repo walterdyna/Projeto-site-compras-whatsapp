@@ -4,6 +4,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import multer from 'multer';
 import path from 'path';
+
 import cors from 'cors';
 import fs from 'fs';
 import bcrypt from 'bcrypt';
@@ -11,6 +12,7 @@ import jwt from 'jsonwebtoken';
 import User from './models/User.js';
 import authRoutes from './routes/auth.js';
 import usersRoutes from './routes/users.js';
+import helmet from 'helmet';
 
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
@@ -23,6 +25,19 @@ const MONGODB_URI = process.env.MONGODB_URI;
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
 app.use(cors());
+
+// Helmet para segurança HTTP
+app.use(helmet());
+
+// Redirecionar HTTP para HTTPS (quando em produção)
+app.use((req, res, next) => {
+    if (process.env.NODE_ENV === 'production') {
+        if (req.headers['x-forwarded-proto'] !== 'https') {
+            return res.redirect('https://' + req.headers.host + req.url);
+        }
+    }
+    next();
+});
 
 // Simple request logger middleware for debugging
 app.use((req, res, next) => {
